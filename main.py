@@ -10,19 +10,28 @@ class PickAUniqueName(Exception):
 
     pass
 
+class StopNotServicedByRoute(Exception):
+    """
+    A custom error class for when information is requested about a stop in which the
+    requested route does not serve a stop
+    """
+
+    pass
+
 class TransitStopNode:
     """
     TODO
     """
-    def __init__(self, route_name, stop_name, stop_order):
+    def __init__(self, route_obj, stop_id, stop_name, stop_order):
         self._stop_name = stop_name
-        self._stop_order = {route_name: stop_order}
-        self._stop_direction = {}
+        self._stop_id = stop_id
+        self._stop_order = {route_obj.get_route_name(): stop_order}
         self._location = {"lat": None, "long": None, "address": None}
-        self._ridership = None
-        self._amenities = None
+        self._ridership = {}
+        self._amenities = {"trash":None, "shelter":None, "sidewalk":None, "advertising":None}
         self._routes = []
-        self._layover = False
+        self._layover = {"layover":False, "layover_time":0}
+        self._transfer = {"transfer":False}
         self.next_stop = None
 
     def __repr__(self):
@@ -34,28 +43,32 @@ class TransitStopNode:
 
     def get_stop_name(self):
         """
-        TODO
+        Returns the transit stop's public name.
         """
 
         return self._stop_name
 
-    def get_stop_order(self, route):
+    def get_stop_id(self):
         """
-        TODO
-        """
-
-        return self._stop_order[route]
-
-    def get_stop_direction(self, route):
-        """
-        TODO
+        Returns the transit stop's unique identification number.
         """
 
-        return self._stop_direction[route]
+        return self._stop_id
+
+    def get_stop_order(self, route_name):
+        """
+        Returns the transit stop's stop order along a route, given a route name.
+        """
+        try:
+            route_stop_order = self._stop_order[route_name]
+            return route_stop_order
+        except StopNotServicedByRoute:
+            print("The route given does not service this transit stop.")
+
 
     def get_next_stop(self):
         """
-        TODO
+        Returns the next stop along the transit route.
         """
 
         return self.next_stop
@@ -67,12 +80,13 @@ class TransitStopNode:
 
         return self._layover
 
-    def set_layover(self, bool_value):
+    def set_layover(self, bool_value, dwell_time):
         """
-        TODO
+        Updates a bus stop with layover information, including the dwell time at the layover.
         """
 
-        self._layover = bool_value
+        self._layover["layover"] = bool_value
+        self._layover["layover_time"] = dwell_time
 
     def add_route(self, route_obj):
         """
@@ -83,49 +97,49 @@ class TransitStopNode:
 
     def get_routes(self):
         """
-        TODO
+        Returns the routes that the transit stop serves.
         """
 
         return self._routes
 
     def get_lat_location(self):
         """
-        TODO
+        Returns the latitude for a transit stop.
         """
 
         return self._location["lat"]
 
     def get_long_location(self):
         """
-        TODO
+        Returns the longitude for a transit stop.
         """
 
         return self._location["long"]
 
     def get_address_location(self):
         """
-        TODO
+        Returns the physical for a transit stop.
         """
 
         return self._location["address"]
 
     def set_lat_location(self, lat_float):
         """
-        TODO
+        Sets the latitude for a transit stop.
         """
 
         self._location["lat"] = lat_float
 
     def set_long_location(self, long_float):
         """
-        TODO
+        Sets the longitude for a transit stop.
         """
 
         self._location["long"] = long_float
 
     def set_address_location(self, address_string):
         """
-        TODO
+        Sets the physical for a transit stop.
         """
 
         self._location["address"] = address_string
